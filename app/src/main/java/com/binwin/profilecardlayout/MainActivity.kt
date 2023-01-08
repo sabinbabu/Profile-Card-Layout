@@ -20,6 +20,7 @@ import androidx.compose.ui.Alignment.Companion.CenterHorizontally
 import androidx.compose.ui.Alignment.Companion.Start
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -55,15 +56,15 @@ fun UserApplication(){
         arguments = listOf(navArgument("userId"){
             type = NavType.IntType
         })
-        ) {navBackStackEntry ->   //getting argument from previous screen through navbackstack
-            UserDetailScreen(navBackStackEntry.arguments!!.getInt("userId"))
+        ) {navBackStackEntry ->   //getting argument from previous screen through navBackstack
+            UserDetailScreen(navBackStackEntry.arguments!!.getInt("userId"),navController)
         }
     }
 }
 
 @Composable
 fun UserListScreen(users : ArrayList<UserProfile> = userData, navHostController: NavHostController ) {
-    Scaffold(topBar = {AppBar(null)}) {
+    Scaffold(topBar = {AppBar(icon = Icons.Default.Home, "Messaging Application" ){} }) {
         Surface(
             modifier = Modifier.fillMaxSize(),
             color = Color.LightGray
@@ -86,14 +87,15 @@ fun UserListScreen(users : ArrayList<UserProfile> = userData, navHostController:
 }
 
 @Composable
-fun AppBar(user: UserProfile?){
+fun AppBar(icon: ImageVector, title: String, onClickBack:()-> Unit){
    TopAppBar(
        navigationIcon = {Icon(
-           imageVector =if (user?.name?.isNotEmpty() == true) Icons.Default.ArrowBack else Icons.Default.Home,
+           imageVector = icon,
            contentDescription = "App Icon",
            Modifier.padding(horizontal = 12.dp)
+               .clickable(onClick = onClickBack)
             )},
-       title = { Text(text = if (user?.name?.isNotEmpty() == true)user.name else "Messaging Application") }
+       title = { Text(text = title) }
    )
 }
 
@@ -155,9 +157,15 @@ fun ProfileContent(user: UserProfile, isProfile : Boolean) {
 }
 
 @Composable
-fun UserDetailScreen(userId : Int) {
+fun UserDetailScreen(userId : Int,navHostController: NavHostController?) {
     val user = userData.first { user -> userId == user.id }
-    Scaffold(topBar = {AppBar(user)}) {
+    Scaffold(topBar = {
+        AppBar(
+            Icons.Default.ArrowBack,
+            user.name){
+            navHostController?.navigateUp()
+        }
+        }) {
         Surface(
             modifier = Modifier.fillMaxSize(),
         ) {
@@ -175,7 +183,7 @@ fun UserDetailScreen(userId : Int) {
 @Composable
 fun UserDetailScreenPreview() {
     ProfileCardLayoutTheme {
-        UserDetailScreen(0)
+        UserDetailScreen(0,null)
     }
 }
 
